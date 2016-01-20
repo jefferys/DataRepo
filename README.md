@@ -11,7 +11,7 @@ Installing
 
 Currently this is only available from GitHub and not from CRAN. Reasing to CRAN is planned once the API stabilizes. To install from GitHub from within an R console, do:
 
-    ```R
+    ``` r
     if (packageVersion("devtools") < 1.6) {
       install.packages("devtools")
     }
