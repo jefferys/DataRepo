@@ -20,5 +20,5 @@ LazyData: TRUE
 Suggests:
     testthat
 URL: http://github.com/jefferys/DataRepo
-BugReports: http://github.com/hadley/jefferys/DataRepo/issues
+BugReports: http://github.com/jefferys/DataRepo/issues
 RoxygenNote: 5.0.1
