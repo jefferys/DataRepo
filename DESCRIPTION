@@ -1,0 +1,22 @@
+Package: DataRepo
+Type: Package
+Title: Manage a large data file repository
+Version: 0.0.1
+Date: 2016-01-20
+Authors@R: c(
+      person( "Stuart R", "Jefferys",
+              email= "srjefferys@gmail.com",
+              role= c("cre", "aut")
+      )
+   )
+Description: This package helps manage a large (100+ TB) collection of data
+    files. It only works on a unix-like file system (i.e. not on Windows) as it
+    uses unix file system groups and permissions to manage access. Access is not
+    very granular, although read permission is separate from write/delete
+    permission. This is currently in a very preliminary state and under active
+    development. Don't count on API consistency across versions yet.
+License: MIT + file LICENSE
+LazyData: TRUE
+Suggests:
+    testthat
+RoxygenNote: 5.0.1
