@@ -5,3 +5,15 @@ DataRepo
 The DataRepo package helps manage a large (100+ TB) collection of data files. It only works on a unix-like file system (i.e. not on Windows) as it uses unix file system groups and permissions to manage data access. Access is not very granular, with read permission granted by membership in a file system group, the "read group" and write permission granted by membership in another group, the "write-group".
 
 This is currently in a very preliminary state and under active development. Don't count on API consistency across versions yet.
+
+Installing
+==========
+
+Currently this is only available from GitHub and not from CRAN. Reasing to CRAN is planned once the API stabilizes. To install from GitHub from within an R console, do:
+
+    ```R
+    if (packageVersion("devtools") < 1.6) {
+      install.packages("devtools")
+    }
+    devtools::install_github("jefferys/DataRepo")
+    ```
