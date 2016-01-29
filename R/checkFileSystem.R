@@ -15,15 +15,27 @@
 #' pre-flight check, these are very useful. Just don't count on the results once
 #' the plane is in the air.
 #'
-#' @param path A file system path to check.
-#'
 #' @return All functions return either an empty string if the check succeeds or
 #'   a non-empty string if the check fails (including if checking causes an
 #'   error.)
 #'
-#' @describeIn checkIsPath Checks if the path exists on the file system.
+#' @name checkFileSystem
+NULL
+
+#' @describeIn checkFileSystem Checks if the path exists on the file system.
 #'   This is a simple wrapper for \code{\link{file.exists}}. Will follow links
-#'   with the result based on the final target.
+#'   with the result based on the final target. Returns one of:
+#'
+#'   \itemize{
+#'    \item{\emph{"" (empty string)}\verb{ }
+#'       Check succeeded as \code{path} exists on the file system.}
+#'    \item{\emph{"No such path."}\verb{ }
+#'       Check failed as \code{path} was not found on the file system.}
+#'    \item{\emph{"Checking for a path failed with the following error: ..."}\verb{ }
+#'       Check failed unexpectedly with an error.}
+#'  }
+#'
+#' @param path A file system path to check.
 #'
 #' @examples
 #' # Create file system objects for examples.
@@ -88,9 +100,18 @@ checkIsPath <- function( path ) {
    return(check)
 }
 
-#' @describeIn checkIsPath Checks that the path does not exist on the file
+#' @describeIn checkFileSystem Checks that the path does not exist on the file
 #'   system. This is a simple wrapper for \code{\link{file.exists}}. Will
 #'   follow links with the result based on the final target.
+#'
+#'   \itemize{
+#'    \item{\emph{"" (empty string)}\verb{ }
+#'       Check succeeded as no such \code{path} exists on the file system.}
+#'    \item{\emph{"No such path."}\verb{ }
+#'       Check failed as \code{path} was found on the file system.}
+#'    \item{\emph{"Checking for a path failed with the following error: ..."}\verb{ }
+#'       Check failed unexpectedly with an error.}
+#'  }
 #'
 #' @export
 #'
@@ -138,10 +159,23 @@ checkIsNotPath <- function( path ) {
    return(check)
 }
 
-#' @describeIn checkIsPath Checks that the path exists and that it is a file or
-#'   a link to a file. If the path fails to exist, is a directory, or is a link
-#'   to a directory, this fails. Will follow links with the result based on the
-#'   final target.
+#' @describeIn checkFileSystem Checks that the path exists and that it is a file
+#'   or a link to a file. If the path fails to exist, is a directory, or is a
+#'   link to a directory, this fails. Will follow links with the result based on
+#'   the final target.
+#'
+#'   \itemize{
+#'    \item{\emph{"" (empty string)}\verb{ }
+#'       Check succeeded as \code{path} exists on the file system and is a file
+#'       or a link to a file (not a directory).}
+#'    \item{\emph{"No such path."}\verb{ }
+#'       Check failed as \code{path} was not found on the file system.}
+#'    \item{\emph{"Not a file."}\verb{ }
+#'       Check failed as \code{path} was found on the file system but was
+#'       neither a file nor a link to file. It probably was a directory.}
+#'    \item{\emph{"Checking for a file failed with the following error: ..."}\verb{ }
+#'       Check failed unexpectedly with an error.}
+#'  }
 #'
 #' @param path.info The data frame returned by the call \code{file.info(path)}.
 #'   By default this is \code{NULL} and will be looked up during execution.
@@ -164,7 +198,7 @@ checkIsNotPath <- function( path ) {
 #'
 #' checkIsFile( emptyFile, path.info= file.info( emptyFile ))
 #' #=> [1] ""
-#' checkIsFile( emptyFile, path.info= file.info( emptyDir ))  # Ooops.
+#' checkIsFile( emptyFile, path.info= file.info( emptyDir ))  # Oops.
 #' #=> [1] "Not a file." # Not true!
 #'
 #' if (okLink) {
@@ -209,10 +243,23 @@ checkIsFile <- function( path, path.info= NULL ) {
    return( check )
 }
 
-#' @describeIn checkIsPath Checks that the path exists and if so ensures it is
+#' @describeIn checkFileSystem Checks that the path exists and if so ensures it is
 #'   neither a file nor a link to a file. If the path fails to exist, is a file,
 #'   or is a link to a file, this fails. Will follow links with the result based
 #'   on the final target.
+#'
+#'   \itemize{
+#'    \item{\emph{"" (empty string)}\verb{ }
+#'       Check succeeded as \code{path} exists on the file system but was
+#'       neither a file nor a link to a file (it was probably a directory).}
+#'    \item{\emph{"No such path."}\verb{ }
+#'       Check failed as \code{path} was not found on the file system.}
+#'    \item{\emph{"Is a file."}\verb{ }
+#'       Check failed as \code{path} was found on the file system and was either
+#'       a file or a link to file.}
+#'    \item{\emph{"Checking for a file failed with the following error: ..."}\verb{ }
+#'       Check failed unexpectedly with an error.}
+#'  }
 #'
 #' @examples
 #' checkIsNotFile( emptyFile )
@@ -227,7 +274,7 @@ checkIsFile <- function( path, path.info= NULL ) {
 #'
 #' checkIsNotFile( emptyFile, path.info= file.info( emptyFile ))
 #' #=> [1] "Is a file."
-#' checkIsNotFile( emptyFile, path.info= file.info( emptyDir ))  # Ooops.
+#' checkIsNotFile( emptyFile, path.info= file.info( emptyDir ))  # Oops.
 #' #=> [1] "" # Not true!
 #'
 #' if (okLink) {
@@ -272,10 +319,23 @@ checkIsNotFile <- function( path, path.info= NULL ) {
    return( check )
 }
 
-#' @describeIn checkIsPath Checks that the path exists and that it is a
+#' @describeIn checkFileSystem Checks that the path exists and that it is a
 #'   directory or a link to a directory If the path fails to exist, is a file,
 #'   or is a link to a file, this fails. Will follow links with the result based
 #'   on the final target.
+#'
+#'   \itemize{
+#'    \item{\emph{"" (empty string)}\verb{ }
+#'       Check succeeded as \code{path} exists on the file system and was either
+#'       a directory or a link to a directory.}
+#'    \item{\emph{"No such path."}\verb{ }
+#'       Check failed as \code{path} was not found on the file system.}
+#'    \item{\emph{"Not a directory."}\verb{ }
+#'       Check failed as \code{path} was found on the file system but was
+#'       neither a directory nor a link to directory. (it was probably a file).}
+#'    \item{\emph{"Checking for a directory failed with the following error: ..."}\verb{ }
+#'       Check failed unexpectedly with an error.}
+#'  }
 #'
 #' @examples
 #' checkIsDir( emptyFile )
@@ -290,7 +350,7 @@ checkIsNotFile <- function( path, path.info= NULL ) {
 #'
 #' checkIsDir( emptyFile, path.info= file.info( emptyFile ))
 #' #=> [1] "Not a directory."
-#' checkIsDir( emptyFile, path.info= file.info( emptyDir ))  # Ooops.
+#' checkIsDir( emptyFile, path.info= file.info( emptyDir ))  # Oops.
 #' #=> [1] "" # Not true!
 #'
 #' if (okLink) {
@@ -335,10 +395,23 @@ checkIsDir <- function( path, path.info= NULL ) {
    return( check )
 }
 
-#' @describeIn checkIsPath Checks that the path exists and if so ensures it is
+#' @describeIn checkFileSystem Checks that the path exists and if so ensures it is
 #'   neither a directory nor a link to a directory If the path fails to exist,
 #'   is a file, or is a link to a file, this fails. Will follow links with the
 #'   result based on the final target.
+#'
+#'   \itemize{
+#'    \item{\emph{"" (empty string)}\verb{ }
+#'       Check succeeded as \code{path} exists on the file system but was neither
+#'       a directory nor a link to a directory. It was probably a file.}
+#'    \item{\emph{"No such path."}\verb{ }
+#'       Check failed as \code{path} was not found on the file system.}
+#'    \item{\emph{"Is a directory."}\verb{ }
+#'       Check failed as \code{path} was found on the file system but was
+#'       either a directory or a link to directory.}
+#'    \item{\emph{"Checking for a directory failed with the following error: ..."}\verb{ }
+#'       Check failed unexpectedly with an error.}
+#'  }
 #'
 #' @examples
 #' checkIsNotDir( emptyFile )
@@ -353,7 +426,7 @@ checkIsDir <- function( path, path.info= NULL ) {
 #'
 #' checkIsNotDir( emptyFile, path.info= file.info( emptyFile ))
 #' #=> [1] ""
-#' checkIsNotDir( emptyFile, path.info= file.info( emptyDir ))  # Ooops.
+#' checkIsNotDir( emptyFile, path.info= file.info( emptyDir ))  # Oops.
 #' #=> [1] "Is a directory." # Not true!
 #'
 #' if (okLink) {
@@ -396,12 +469,34 @@ checkIsNotDir <- function( path, path.info= NULL ) {
    )
 }
 
-#' @describeIn checkIsPath Checks a path to see if it is a symlink (and hence
-#' exists). By default, also follows link to ensure it points to a real file or
-#' directory, unless okBadLink is set TRUE.
+#' @describeIn checkFileSystem Checks a path to see if it is a symlink (and
+#'   hence exists). By default, also follows link to ensure it points to a real
+#'   file or directory, unless \code{okBadLink} is set \code{TRUE}.
 #'
-#' @param okBadLink By default this is FALSE and links with missing targets will
-#' result in a failure message. Set TRUE to allow bad links.
+#'   \itemize{
+#'    \item{\emph{"" (empty string)}\verb{ }
+#'       Check succeeded as \code{path} exists on the file system and was a
+#'       link. If okBadLink is FALSE, it must also point, eventually, to
+#'       a real file or directory.}
+#'    \item{\emph{"No such path."}\verb{ }
+#'       Check failed as the \code{path} was not found on the file system.}
+#'    \item{\emph{"Not a link."}\verb{ }
+#'       Check failed as \code{path} was found on the file system but was
+#'       not a link. (It is probably a real file or directory.)}
+#'    \item{\emph{"Bad link."}\verb{ }
+#'       Check failed as \code{path} was found on the file system and it was
+#'       a link, but \code{okBadLink = FALSE}, and the link (eventually) ends
+#'       with a link to nowhere.}
+#'    \item{\emph{"Unspecified error occurred checking if existing path was a link."}\verb{ }
+#'       A weird condition occurred where the path exists but the check for a
+#'       link with \code{\link{Sys.readlink}} returned \code{NA}.}
+#'    \item{\emph{"Checking for a link failed with the following error: ..."}\verb{ }
+#'       Check failed unexpectedly with an error.}
+#'  }
+#'
+#' @param okBadLink By default this is \code{FALSE} and links with missing
+#'   targets will result in a failure message. Set \code{TRUE} to allow bad
+#'   links.
 #'
 #' @export
 #'
@@ -443,7 +538,7 @@ checkIsLink <- function( path, okBadLink = FALSE ) {
             }
             else {
                # This may not be possible...
-               check <- 'Unspecified error occured checking if existing path was link.'
+               check <- 'Unspecified error occurred checking if existing path was a link.'
             }
          }
          else if (linkStat == "") {
@@ -468,9 +563,25 @@ checkIsLink <- function( path, okBadLink = FALSE ) {
    return( check )
 }
 
-#' @describeIn checkIsPath Ensures that the path exists and is a real file or
+#' @describeIn checkFileSystem Ensures that the path exists and is a real file or
 #'   directory. If it is a symbolic link, this fails. The status of a link
 #'   target is not checked, as links with or without targets fail.
+#'
+#'   \itemize{
+#'    \item{\emph{"" (empty string)}\verb{ }
+#'       Check succeeded as \code{path} exists on the file system and is a real
+#'       file or directory (not a link).}
+#'    \item{\emph{"No such path."}\verb{ }
+#'       Check failed as the \code{path} was not found on the file system.}
+#'    \item{\emph{"Not a link."}\verb{ }
+#'       Check failed as \code{path} was found on the file system but it was
+#'       a symbolic link.}
+#'    \item{\emph{"Unspecified error occurred checking if existing path was a link."}\verb{ }
+#'       A weird condition occurred where the path exists but the check for a
+#'       link with \code{\link{Sys.readlink}} returned \code{NA}.}
+#'    \item{\emph{"Checking for a link failed with the following error: ..."}\verb{ }
+#'       Check failed unexpectedly with an error.}
+#'  }
 #'
 #' @examples
 #' checkIsNotLink( emptyFile )
@@ -516,7 +627,7 @@ checkIsNotLink <- function( path ) {
             }
             else {
                # This may not be possible...
-               check <- 'Unspecified error occured checking if existing path was link.'
+               check <- 'Unspecified error occurred checking if existing path was a link.'
             }
          }
          else if (linkStat == "") {

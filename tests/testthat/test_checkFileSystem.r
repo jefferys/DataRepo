@@ -1137,7 +1137,7 @@ describe( "checkIsNotLink() - path=", {
       expect_equal( got, want)
    })
    it( "Sys.read but path exists? Return an error string (not an error).", {
-      wantRE <- 'Unspecified error occured checking if existing path was link.'
+      wantRE <- 'Unspecified error occurred checking if existing path was a link.'
       with_mock(
          `base::Sys.readlink` = function(...) {return(NA_character_)},
          expect_silent({ got <- checkIsNotLink( emptyDir ) })
@@ -1212,7 +1212,7 @@ describe( "checkIsLink() - path=", {
       expect_equal( got, want)
    })
    it( "Sys.read error but path exists? Return an error string (not an error).", {
-      wantRE <- 'Unspecified error occured checking if existing path was link.'
+      wantRE <- 'Unspecified error occurred checking if existing path was a link.'
       with_mock(
          `base::Sys.readlink` = function(...) {return(NA_character_)},
          expect_silent({ got <- checkIsLink( emptyDir ) })
@@ -1285,7 +1285,7 @@ describe( "checkIsLink() - okBadLink=", {
       expect_equal( got, want)
    })
    it( "Sys.read error but path exists? Return an error string (not an error).", {
-      wantRE <- 'Unspecified error occured checking if existing path was link.'
+      wantRE <- 'Unspecified error occurred checking if existing path was a link.'
       with_mock(
          `base::Sys.readlink` = function(...) {return(NA_character_)},
          expect_silent({ got <- checkIsLink( emptyDir, okBadLink= TRUE ) })
