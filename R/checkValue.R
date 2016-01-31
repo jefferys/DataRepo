@@ -112,7 +112,7 @@ checkIsNotNull <- function (value) {
 #'       max.}
 #'    \item{\emph{"Length is not between \code{min} and \code{max}."}\verb{ }
 #'       Check failed as \code{value} had a length > max, or had a length < min
-#'       (or both if min and max were chosen poorly!).}
+#'       (or both min and max were chosen poorly!).}
 #'    \item{\emph{"Length is not \code{length}."}\verb{ }
 #'       Check failed as \code{value} did not have the specified length. This
 #'       message is only given when max == min.}
