@@ -466,3 +466,227 @@ describe( "blacklist checking", {
       expect_match( got, wantRE)
    })
 })
+
+context('checkCharacterCount()')
+describe( "checkCharacterCount() vector=", {
+   it( "returns empty string when all char counts >= 1", {
+      want <- ''
+      got <- checkCharacterCount( c('Alice', 'Bob') )
+      expect_equal(got, want)
+      got <- checkCharacterCount( 'OK' )
+      expect_equal(got, want)
+      got <- checkCharacterCount( c('∑', 'NA', ' ' ))
+      expect_equal(got, want)
+   })
+   it( "returns failure string if not a vector of mode character", {
+      want <- "Not a vector of mode character."
+
+      got <- checkCharacterCount( list( A=2 ))
+      expect_equal(got, want)
+      got <- checkCharacterCount( c( 1, 2 ))
+      expect_equal(got, want)
+      got <- checkCharacterCount( 1 )
+      expect_equal(got, want)
+      got <- checkCharacterCount( raw(0) )
+      expect_equal(got, want)
+      got <- checkCharacterCount( NULL )
+      expect_equal(got, want)
+   })
+   it( "returns failure string if an empty character vector", {
+      want <-"Empty character vector."
+
+      got <- checkCharacterCount( character(0) )
+      expect_equal(got, want)
+   })
+   it( "returns failure string by default if an any element is the empty string.", {
+      want <- "Character count is not between 1 and Inf."
+
+      got <- checkCharacterCount( c('a', 'b', '' ) )
+      expect_equal(got, want)
+      got <- checkCharacterCount( c('', '', '' ) )
+      expect_equal(got, want)
+      got <- checkCharacterCount( c('') )
+      expect_equal(got, want)
+   })
+   it( "returns failure string by default if an any element is missing.", {
+      want <- "Contains NA."
+
+      got <- checkCharacterCount( c('a', 'b', NA_character_ ) )
+      expect_equal(got, want)
+      got <- checkCharacterCount( c(NA_character_, NA_character_, NA_character_ ) )
+      expect_equal(got, want)
+      got <- checkCharacterCount( c(NA_character_) )
+      expect_equal(got, want)
+   })
+   it( "returns an error string (not error) if internal error occurs", {
+      wantRE <- "Checking character count failed with the following error: naughty 'checkIsVector'"
+      with_mock(
+         `checkIsVector` = function(...) stop("naughty 'checkIsVector'"),
+         expect_silent({ got <- checkCharacterCount( "Bob" ) })
+      )
+      expect_match( got, wantRE)
+   })
+
+})
+describe( "checkCharacterCount() minimumCharacterCount=", {
+   it( "returns empty string when all char counts >= minimumCharacterCount", {
+      want <- ''
+
+      got <- checkCharacterCount( c('Alice', 'Bob'), minimumCharacterCount = 3 )
+      expect_equal(got, want)
+      got <- checkCharacterCount( c('Alice', 'Bob'), min = 1 )
+      expect_equal(got, want)
+      got <- checkCharacterCount( c('∑', 'NA', ' ' ), min= 1)
+      expect_equal(got, want)
+      got <- checkCharacterCount( c('∑', 'NA', ' ' ), min= 0)
+      expect_equal(got, want)
+      got <- checkCharacterCount( c('∑', 'NA', ' ' ), min= -1)
+      expect_equal(got, want)
+      got <- checkCharacterCount( c('∑', 'X', ' ' ), min= 1)
+      expect_equal(got, want)
+   })
+   it( 'Returns failure string when any char count < min', {
+      want <- "Character count is not between 4 and Inf."
+      got <- checkCharacterCount( c('Alice', 'Bob'), minimumCharacterCount = 4 )
+      expect_equal(got, want)
+      want <- "Character count is not between 100 and Inf."
+      got <- checkCharacterCount( c('Alice', 'Bob'), min = 100 )
+      expect_equal(got, want)
+      want <- "Character count is not Inf."
+      got <- checkCharacterCount( c('∑', 'NA', ' ' ), min= Inf)
+      expect_equal(got, want)
+   })
+})
+describe( "checkCharacterCount() maximumCharacterCount=", {
+   it( 'returns empty string when char counts <= maximumCharacterCount', {
+      want <- ''
+
+      got <- checkCharacterCount( c('Alice', 'Bob'), maximumCharacterCount = 5 )
+      expect_equal(got, want)
+      got <- checkCharacterCount( c('Alice', 'Bob'), maximumCharacterCount = 6 )
+      expect_equal(got, want)
+      got <- checkCharacterCount( c('∑', 'NA', ' ' ), max= 2)
+      expect_equal(got, want)
+      got <- checkCharacterCount( c('∑', 'NA', ' ' ), max= 5000)
+      expect_equal(got, want)
+      got <- checkCharacterCount( c('∑', 'X', ' ' ),  max= 1)
+      expect_equal(got, want)
+   })
+   it( "Returns failure string when any char count > max", {
+      want <- "Character count is not between 1 and 4."
+      got <- checkCharacterCount( c('Alice', 'Bob'), maximumCharacterCount = 4 )
+      expect_equal(got, want)
+
+      want <- "Character count is not between 1 and 2."
+      got <- checkCharacterCount( c('Alice', 'Bob'), max = 2 )
+      expect_equal(got, want)
+
+      want <- "Character count is not between 1 and -100."
+      got <- checkCharacterCount( c('∑', 'NA', ' ' ), max= -100)
+      expect_equal(got, want)
+
+      want <- "Character count is not 1."
+      got <- checkCharacterCount( c('∑∑', 'NA', '  ' ),  max= 1)
+      expect_equal(got, want)
+   })
+})
+describe( "checkCharacterCount() maximumCharacterCount=", {
+   it( "returns empty string when all min <= char counts <= max", {
+      want <- ''
+
+      got <- checkCharacterCount( c('Alice', 'Bob'),
+                                  minimumCharacterCount = 3, maximumCharacterCount = 5 )
+      expect_equal(got, want)
+      got <- checkCharacterCount( c('Alice', 'Bob'), min = 2, max = 6 )
+      expect_equal(got, want)
+      got <- checkCharacterCount( c('∑', 'NA', ' ' ), min= 1, max= 2)
+      expect_equal(got, want)
+      got <- checkCharacterCount( c('∑', 'NA', ' ' ), min= -1000, max= 5000)
+      expect_equal(got, want)
+      got <- checkCharacterCount( c('∑', 'X', ' ' ), min= 1, max= 1)
+      expect_equal(got, want)
+   })
+   it( "returns an error string when min > char &/or counts < max", {
+      want <- "Character count is not between 3 and 4."
+      got <- checkCharacterCount( c('Alice', 'Bob'),
+                  minimumCharacterCount = 3, maximumCharacterCount = 4 )
+      expect_equal(got, want)
+
+      want <- "Character count is not between 4 and 5."
+      got <- checkCharacterCount( c('Alice', 'Bob'), min = 4, max = 5 )
+      expect_equal(got, want)
+
+      want <- "Character count is not 5."
+      got <- checkCharacterCount( c('Alice', 'Bob'), min = 5, max = 5 )
+      expect_equal(got, want)
+
+      want <- "Character count is not between 10 and 20."
+      got <- checkCharacterCount( c('∑', 'NA', ' ' ), min= 10, max= 20)
+      expect_equal(got, want)
+
+      want <- "Character count is not between 4 and 1."
+      got <- checkCharacterCount( c('∑', 'NA', ' ' ), min= 4, max= 1)
+      expect_equal(got, want)
+
+      want <- "Character count is not between -5 and 0."
+      got <- checkCharacterCount( c('∑', 'NA', ' ' ), min= -5, max= 0)
+      expect_equal(got, want)
+
+   })
+})
+describe( "checkCharacterCount() allowNA=", {
+   it( "returns empty string when all min <= char counts <= max, ignoring NA", {
+      want <- ''
+
+      got <- checkCharacterCount( c('Alice', 'Bob'), allowNA= TRUE )
+      expect_equal(got, want)
+
+      got <- checkCharacterCount( c('Alice', 'Bob', NA), allowNA= TRUE )
+      expect_equal(got, want)
+
+      got <- checkCharacterCount( c('Alice', 'Bob'), allowNA= TRUE,
+               minimumCharacterCount = 3, maximumCharacterCount = 5 )
+      expect_equal(got, want)
+
+      got <- checkCharacterCount( c('Alice', 'Bob', NA), allowNA= TRUE,
+               minimumCharacterCount = 3, maximumCharacterCount = 5 )
+      expect_equal(got, want)
+
+      got <- checkCharacterCount( NA_character_, allowNA= TRUE )
+      expect_equal(got, want)
+
+      got <- checkCharacterCount( c(NA_character_, NA_character_, NA_character_),
+                                  allowNA= TRUE, min=100, max=100 )
+      expect_equal(got, want)
+
+   })
+   it( "returns an error string when min > char &/or counts < max, ignoring NA", {
+      want <- "Character count is not between 3 and 4."
+      got <- checkCharacterCount( c('Alice', 'Bob'), allowNA= TRUE,
+               minimumCharacterCount = 3, maximumCharacterCount = 4 )
+      expect_equal(got, want)
+
+      want <- "Character count is not between 3 and 4."
+      got <- checkCharacterCount( c('Alice', 'Bob', NA), allowNA= TRUE,
+               minimumCharacterCount = 3, maximumCharacterCount= 4 )
+      expect_equal(got, want)
+
+      want <- "Character count is not 5."
+      got <- checkCharacterCount( c('Alice', 'Bob'), allowNA= TRUE, min = 5, max = 5 )
+      expect_equal(got, want)
+
+      want <- "Character count is not 5."
+      got <- checkCharacterCount( c('Alice', 'Bob', NA), allowNA= TRUE, min = 5, max = 5 )
+      expect_equal(got, want)
+
+      want <- "Character count is not between 0 and 1."
+      got <- checkCharacterCount( c('∑', 'NA', ' ' ), allowNA= TRUE, min= 0, max= 1)
+      expect_equal(got, want)
+
+      want <- "Character count is not between 0 and 1."
+      got <- checkCharacterCount( c('∑', 'NA', ' ', NA ), allowNA= TRUE, min= 0, max= 1)
+      expect_equal(got, want)
+
+   })
+})
+

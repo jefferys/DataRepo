@@ -291,3 +291,129 @@ checkIsNotIn <- function (vector, checklist=NULL) {
       ))
    })
 }
+
+#' @describeIn checkVector Use to test that all elements of a character vector
+#'   have a number of characters between \code{minimumCharacterCount} and
+#'   \code{maximumCharacterCount}, inclusive. By default checks that length is
+#'   between \code{1} and \code{Inf} and contains no \code{NA_character_}
+#'   values, which is probably the most common string validation case. By
+#'   default does not allow NA elements, set \code{allowNA= TRUE} to ignore
+#'   missing values. Note that NULL and empty character vectors are never
+#'   allowed. Returns one of:
+#'
+#'  \itemize{
+#'    \item{\emph{"" (empty string)}\verb{ }
+#'       Check succeeded as \code{vector} was a character vector with all string
+#'       elements at least \code{min} long, but no more than \code{max} long,
+#'       and only containing missing values if explicitly allowed by
+#'       \code{allowNA}.}
+#'    \item{\emph{"Not a vector of mode character."}\verb{ }
+#'       Check failed as \code{vector} was either not an atomic vector (e.g. was
+#'       a list or had some attributes), or it was not a character vector}
+#'    \item{\emph{"Empty character vector."}\verb{ }
+#'       Empty character vectors have no content to check, so always fail. }
+#'    \item{\emph{"Character count is not between \code{minimumCharacterCount} and \code{maximumCharacterCount}."}\verb{ }
+#'       Check failed as some element in \code{vector} had a length > max, or
+#'       had a length < min (or both min and max were chosen poorly!).}
+#'    \item{\emph{"Character count is not \code{length}."}\verb{ }
+#'       Check failed as some element in \code{vector} did not have the
+#'       specified length. This message is only given when max == min.}
+#'    \item{\emph{"Checking for character count failed with the following error: ..."}\verb{ }
+#'       Check failed unexpectedly with an error.}
+#'  }
+#'
+#' @param minimumCharacterCount The minimum length \code{value} must have. Shorter than
+#'   this and the check will fail. The default is 0. Often abbreviated 'min'.
+#'
+#' @param maximumCharacterCount The maximum length \code{value} must have. Longer than this
+#'   and the check will fail. The default is \code{Inf}. Often abbreviated 'max'.
+#'
+#' @param allowNA If set, skips testing any missing vector elements. By default
+#'   this is  \code{FALSE} and any \code{NA} element will usually cause a test
+#'   to fail. Note, if this is set \code{TRUE}, an all-\code{NA} vector will
+#'   probably pass.
+#'
+#' @examples
+#' # Testing the character count of vector elements.
+#' checkCharacterCount( 'Alice' )
+#' #=> [1] ""
+#' checkCharacterCount( c('Alice', 'Bob') )
+#' #=> [1] ""
+#' checkCharacterCount( c('Alice', 'Bob'), minimumCharacterCount= 3,
+#'                                         maximumCharacterCount= 5 )
+#' #=> [1] ""
+#' checkCharacterCount( 'Alice', min= 10 )
+#' #=> [1] "Character count is not between 10 and Inf."
+#' checkCharacterCount( 'Alice', max= 3 )
+#' #=> [1] "Character count is not between 1 and 3."
+#' checkCharacterCount( 'Alice', max= 1 )
+#' #=> [1] "Character count is not 1."
+#' checkCharacterCount( c('Alice', 'Bob'), min= 3, max= 4 )
+#' #=> [1] "Character count is not between 3 and 4."
+#' checkCharacterCount( c('Alice', 'Bob'), min= 10, max= 20 )
+#' #=> [1] "Character count is not between 4 and 20."
+#' checkCharacterCount( c('Alice', 'Bob'), min=5, max= 5 )
+#' #=> [1] "Character count is not 5."
+#' checkCharacterCount( c('Alice', '') )
+#' #=> [1] "Character count is not between 1 and Inf"
+#' checkCharacterCount( c('Alice', 'Bob', NA) )
+#' #=> [1] "Contains NA"
+#' checkCharacterCount( c('Alice', 'Bob', NA), allowNA= TRUE )
+#' #=> [1] ""
+#' checkCharacterCount( c('', NA), allowNA= TRUE )
+#' #=> [1] "Character count is not between 1 and Inf"
+#' checkCharacterCount( c('Alice', 'Bob', NA), allowNA= TRUE, min=2, max=2 )
+#' #=> [1] "Character count is not 2."
+#' checkCharacterCount( c(NA_character, NA_character), allowNA= TRUE, min=100, max=100 )
+#' #=> [1] ""         # Probably not what you want!
+#' #=> [1] "Not a vector of mode character."
+#' checkCharacterCount( NULL )
+#' #=> [1] "Not a vector of mode character."
+#' checkCharacterCount( list(A=1) )
+#' #=> [1] "Not a vector of mode character."
+#' checkCharacterCount( character(0) )
+#' #=> [1] "Empty character vector."
+#'
+#' @export
+checkCharacterCount <- function (
+   vector, minimumCharacterCount= 1, maximumCharacterCount= Inf,
+   allowNA = FALSE
+) {
+   tryCatch({
+      check <- checkIsVector(vector, mode='character')
+      if (check == '' && length(vector) == 0) {
+         check <- 'Empty character vector.'
+      }
+      if ( check == '' && anyNA( vector )) {
+         if (! allowNA) {
+            check <- 'Contains NA.'
+         }
+         else {
+            vector <- vector[! is.na(vector)]
+         }
+      }
+
+      if ( check != '' ) {
+         check
+      }
+      else if ( all(
+         minimumCharacterCount <= nchar(vector, keepNA= TRUE) &
+               maximumCharacterCount >= nchar(vector, keepNA= TRUE),
+         na.rm= allowNA
+      )) {
+         ''
+      }
+      else if (minimumCharacterCount == maximumCharacterCount) {
+         paste0( "Character count is not ", minimumCharacterCount, ".")
+      }
+      else {
+         paste0( "Character count is not between ",
+                 minimumCharacterCount, " and ", maximumCharacterCount, "." )
+      }
+   }, error= function (e) {
+      return( paste0(
+         "Checking character count failed with the following error: ",
+         conditionMessage(e)
+      ))
+   })
+}
