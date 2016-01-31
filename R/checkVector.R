@@ -74,23 +74,19 @@ NULL
 #' #=> [1] TRUE
 #'
 checkIsVector <- function (vector, mode= 'any') {
-   tryCatch(
-      {
-         if (is.vector(vector, mode= mode) && ! is.list(vector)) {
-            check <- ''
-         }
-         else {
-            check <- paste0( 'Not a vector of mode ', mode, '.')
-         }
-      },
-      error= function (e) {
-         check <<- paste0(
-            "Checking for a vector failed with the following error: ",
-            conditionMessage(e)
-         )
+   tryCatch({
+      if (is.vector(vector, mode= mode) && ! is.list(vector)) {
+         ''
       }
-   )
-   return(check)
+      else {
+         paste0( 'Not a vector of mode ', mode, '.')
+      }
+   }, error= function (e) {
+      return( paste0(
+         "Checking for a vector failed with the following error: ",
+         conditionMessage(e)
+      ))
+   })
 }
 
 #' @describeIn checkVector Use as a convenient method to check if a vector is a
@@ -133,22 +129,20 @@ checkIsVector <- function (vector, mode= 'any') {
 #'
 #' @export
 checkIsSingle <- function (vector, mode= 'any') {
-   tryCatch(
-      {
-         check <- checkIsVector(vector, mode= mode)
-         if (check != '' ) {
-            return(check)
-         }
-         check <- checkLength(vector, minimumLength= 1, maximumLength= 1)
-      },
-      error= function (e) {
-         check <<- paste0(
-            "Checking for a single valued vector failed with the following error: ",
-            conditionMessage(e)
-         )
+   tryCatch({
+      check <- checkIsVector(vector, mode= mode)
+      if (check != '' ) {
+         check
       }
-   )
-   return(check)
+      else {
+         checkLength(vector, minimumLength= 1, maximumLength= 1)
+      }
+   }, error= function (e) {
+      return( paste0(
+         "Checking for a single valued vector failed with the following error: ",
+         conditionMessage(e)
+      ))
+   })
 }
 
 #' @describeIn checkVector Use to test the content of an atomic vector against
@@ -199,32 +193,29 @@ checkIsSingle <- function (vector, mode= 'any') {
 #' #=> [1] "Bad parameter 'vector'. Not a vector of mode character."
 #'
 checkIsIn <- function (vector, checklist=NULL) {
-   tryCatch(
-      {
-         check <- checkIsVector(checklist)
-         if (check != '' ) {
-            return(paste0("Bad parameter 'checklist'. ", check))
-         }
+   tryCatch({
+      check <- checkIsVector(checklist)
+      if (check != '' ) {
+         paste0("Bad parameter 'checklist'. ", check)
+      }
+      else {
          check <- checkIsVector(vector, mode= mode(checklist))
          if (check != '' ) {
-            return(paste0("Bad parameter 'vector'. ", check))
+            paste0("Bad parameter 'vector'. ", check)
          }
-
-         if ( all( vector %in% checklist )) {
-            check <- ''
+         else if ( all( vector %in% checklist )) {
+            ''
          }
          else {
-            check <- 'Some element is not in the checklist.'
+            'Some element is not in the checklist.'
          }
-      },
-      error= function (e) {
-         check <<- paste0(
-            "Checking against checklist failed with the following error: ",
-            conditionMessage(e)
-         )
       }
-   )
-   return(check)
+   }, error= function (e) {
+      return( paste0(
+         "Checking against checklist failed with the following error: ",
+         conditionMessage(e)
+      ))
+   })
 }
 
 #' @describeIn checkVector Use to test the content of an atomic vector against a
@@ -276,30 +267,27 @@ checkIsIn <- function (vector, checklist=NULL) {
 #' #=> [1] "Bad parameter 'vector'. Not a vector of mode character."
 #'
 checkIsNotIn <- function (vector, checklist=NULL) {
-   tryCatch(
-      {
-         check <- checkIsVector(checklist)
-         if (check != '' ) {
-            return(paste0("Bad parameter 'checklist'. ", check))
-         }
+   tryCatch({
+      check <- checkIsVector(checklist)
+      if (check != '' ) {
+         paste0("Bad parameter 'checklist'. ", check)
+      }
+      else {
          check <- checkIsVector(vector, mode= mode(checklist))
          if (check != '' ) {
-            return(paste0("Bad parameter 'vector'. ", check))
+            paste0("Bad parameter 'vector'. ", check)
          }
-
-         if ( any( vector %in% checklist )) {
-            check <- 'Some element is in the checklist.'
+         else if ( any( vector %in% checklist )) {
+            'Some element is in the checklist.'
          }
          else {
-            check <- ''
+            ''
          }
-      },
-      error= function (e) {
-         check <<- paste0(
-            "Checking against checklist failed with the following error: ",
-            conditionMessage(e)
-         )
       }
-   )
-   return(check)
+   }, error= function (e) {
+      return( paste0(
+         "Checking against checklist failed with the following error: ",
+         conditionMessage(e)
+      ))
+   })
 }

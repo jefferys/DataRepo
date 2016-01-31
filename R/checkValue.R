@@ -45,23 +45,19 @@ NULL
 #'
 #' @export
 checkIsNull <- function (value) {
-   tryCatch(
-      {
-         if (is.null(value)) {
-            check <- ''
-         }
-         else {
-            check <- 'Is not null.'
-         }
-      },
-      error= function (e) {
-         check <<- paste0(
-            "Checking for null failed with the following error: ",
-            conditionMessage(e)
-         )
+   tryCatch({
+      if (is.null(value)) {
+         ''
       }
-   )
-   return(check)
+      else {
+         'Is not null.'
+      }
+   }, error= function (e) {
+      return( paste0(
+         "Checking for null failed with the following error: ",
+         conditionMessage(e)
+      ))
+   })
 }
 
 #' @describeIn checkValue Use to test that a value is not \code{NULL}. Returns
@@ -89,23 +85,19 @@ checkIsNull <- function (value) {
 #'
 #' @export
 checkIsNotNull <- function (value) {
-   tryCatch(
-      {
-         if (is.null(value)) {
-            check <- 'Is null.'
-         }
-         else {
-            check <- ''
-         }
-      },
-      error= function (e) {
-         check <<- paste0(
-            "Checking for null failed with the following error: ",
-            conditionMessage(e)
-         )
+   tryCatch({
+      if (is.null(value)) {
+         'Is null.'
       }
-   )
-   return(check)
+      else {
+         ''
+      }
+   }, error= function (e) {
+      return( paste0(
+         "Checking for null failed with the following error: ",
+         conditionMessage(e)
+      ))
+   })
 }
 
 #' @describeIn checkValue Use to test that a value has a length between
@@ -161,28 +153,27 @@ checkLength <- function (value, minimumLength= 0, maximumLength= Inf) {
    tryCatch({
       check <- checkIsNotNull(value)
       if (check != '' ) {
-         return(paste0("Bad parameter 'value'. ", check))
-      }
-      len <- length(value)
-      if (len <= maximumLength && len >= minimumLength) {
-         check <- ''
-      }
-      else if (minimumLength == maximumLength) {
-         check <- paste0( "Length is not ", minimumLength, ".")
+         paste0("Bad parameter 'value'. ", check)
       }
       else {
-         check <- paste0( "Length is not between ",
-                          minimumLength, " and ", maximumLength, "." )
+         len <- length(value)
+         if (len <= maximumLength && len >= minimumLength) {
+            ''
+         }
+         else if (minimumLength == maximumLength) {
+            paste0( "Length is not ", minimumLength, ".")
+         }
+         else {
+            paste0( "Length is not between ",
+                     minimumLength, " and ", maximumLength, "." )
+         }
       }
-   },
-   error= function (e) {
-      check <<- paste0(
+   }, error= function (e) {
+      return( paste0(
          "Checking for length failed with the following error: ",
          conditionMessage(e)
-      )
-   }
-   )
-   return(check)
+      ))
+   })
 }
 
 #' @describeIn checkValue Use to check if an expression (\code{value})
@@ -235,33 +226,29 @@ checkLength <- function (value, minimumLength= 0, maximumLength= Inf) {
 #' #=> [1] ""Checking expression for truth failed with the following error: Oops."
 #'
 checkIsTrue <- function (value) {
-   tryCatch(
-      {
-         result <- eval(value)
-         if (! is.vector(result, mode= 'logical')) {
-            check <- "Result is not a vector of mode logical."
-         }
-         else if (! length(result) == 1) {
-            check <- "Resulting logical vector is not of length 1."
-         }
-         else if ( is.na(result) ) {
-            check <- 'Is NA.'
-         }
-         else if (result) {
-            check <- ''
-         }
-         else {
-            check <- 'Is false.'
-         }
-      },
-      error= function (e) {
-         check <<- paste0(
-            "Checking expression for truth failed with the following error: ",
-            conditionMessage(e)
-         )
+   tryCatch({
+      result <- eval(value)
+      if (! is.vector(result, mode= 'logical')) {
+         "Result is not a vector of mode logical."
       }
-   )
-   return(check)
+      else if (! length(result) == 1) {
+         "Resulting logical vector is not of length 1."
+      }
+      else if ( is.na(result) ) {
+         'Is NA.'
+      }
+      else if (result) {
+         ''
+      }
+      else {
+         'Is false.'
+      }
+   }, error= function (e) {
+      return( paste0(
+         "Checking expression for truth failed with the following error: ",
+         conditionMessage(e)
+      ))
+   })
 }
 
 #' @describeIn checkValue Use to check if an expression (\code{value})
@@ -314,31 +301,27 @@ checkIsTrue <- function (value) {
 #' #=> [1] "Checking expression for falsehood failed with the following error: Oops."
 #'
 checkIsFalse <- function (value) {
-   tryCatch(
-      {
-         result <- eval(value)
-         if (! is.vector(result, mode= 'logical')) {
-            check <- "Result is not a vector of mode logical."
-         }
-         else if (! length(result) == 1) {
-            check <- "Resulting logical vector is not of length 1."
-         }
-         else if ( is.na(result) ) {
-            check <- 'Is NA.'
-         }
-         else if (result) {
-            check <- 'Is true.'
-         }
-         else {
-            check <- ''
-         }
-      },
-      error= function (e) {
-         check <<- paste0(
-            "Checking expression for falsehood failed with the following error: ",
-            conditionMessage(e)
-         )
+   tryCatch({
+      result <- eval(value)
+      if (! is.vector(result, mode= 'logical')) {
+         "Result is not a vector of mode logical."
       }
-   )
-   return(check)
+      else if (! length(result) == 1) {
+         "Resulting logical vector is not of length 1."
+      }
+      else if ( is.na(result) ) {
+         'Is NA.'
+      }
+      else if (result) {
+         'Is true.'
+      }
+      else {
+         ''
+      }
+   }, error= function (e) {
+      return( paste0(
+         "Checking expression for falsehood failed with the following error: ",
+         conditionMessage(e)
+      ))
+   })
 }

@@ -83,21 +83,18 @@ NULL
 #' @export
 checkIsPath <- function( path ) {
    tryCatch({
-         if (file.exists(path)) {
-            check <- ""
-         }
-         else {
-            check <- "No such path."
-         }
-      },
-      error= function (e) {
-         check <<- paste0(
-            "Checking for a path failed with the following error: ",
-            conditionMessage(e)
-         )
+      if (file.exists(path)) {
+         ""
       }
-   )
-   return(check)
+      else {
+         "No such path."
+      }
+   }, error= function (e) {
+      return( paste0(
+         "Checking for a path failed with the following error: ",
+         conditionMessage(e)
+      ))
+   })
 }
 
 #' @describeIn checkFileSystem Checks that the path does not exist on the file
@@ -142,21 +139,18 @@ checkIsPath <- function( path ) {
 #'
 checkIsNotPath <- function( path ) {
    tryCatch({
-         if (! file.exists(path)) {
-            check <- ""
-         }
-         else {
-            check <- "Path exists."
-         }
-      },
-      error= function (e) {
-         check <<- paste0(
-            "Checking for a path failed with the following error: ",
-            conditionMessage(e)
-         )
+      if (! file.exists(path)) {
+         ""
       }
-   )
-   return(check)
+      else {
+         "Path exists."
+      }
+   }, error= function (e) {
+      return( paste0(
+         "Checking for a path failed with the following error: ",
+         conditionMessage(e)
+      ))
+   })
 }
 
 #' @describeIn checkFileSystem Checks that the path exists and that it is a file
@@ -218,29 +212,26 @@ checkIsNotPath <- function( path ) {
 #' @export
 checkIsFile <- function( path, path.info= NULL ) {
    tryCatch({
-         if ( ! file.exists(path)) {
-            return( "No such path." )
-         }
-
+      if ( ! file.exists(path)) {
+         "No such path."
+      }
+      else {
          if (is.null(path.info)) {
             path.info <- file.info( path, extra_cols = FALSE )
          }
-
-         if( path.info$isdir ) {
-            check <- 'Not a file.'
+         if ( path.info$isdir ) {
+            'Not a file.'
          }
          else {
-            check <- ''
+            ''
          }
-      },
-      error= function (e) {
-         check <<- paste0(
-            "Checking for a file failed with the following error: ",
-            conditionMessage(e)
-         )
       }
-   )
-   return( check )
+   }, error= function (e) {
+      return( paste0(
+         "Checking for a file failed with the following error: ",
+         conditionMessage(e)
+      ))
+   })
 }
 
 #' @describeIn checkFileSystem Checks that the path exists and if so ensures it is
@@ -294,29 +285,26 @@ checkIsFile <- function( path, path.info= NULL ) {
 #' @export
 checkIsNotFile <- function( path, path.info= NULL ) {
    tryCatch({
-         if ( ! file.exists(path)) {
-            return( "No such path." )
-         }
-
+      if ( ! file.exists(path)) {
+         "No such path."
+      }
+      else {
          if (is.null(path.info)) {
             path.info <- file.info( path, extra_cols = FALSE )
          }
-
-         if( path.info$isdir ) {
-            check <- ''
+         if ( path.info$isdir ) {
+            ''
          }
          else {
-            check <- 'Is a file.'
+            'Is a file.'
          }
-      },
-      error= function (e) {
-         check <<- paste0(
-            "Checking for a file failed with the following error: ",
-            conditionMessage(e)
-         )
       }
-   )
-   return( check )
+   }, error= function (e) {
+      return( paste0(
+         "Checking for a file failed with the following error: ",
+         conditionMessage(e)
+      ))
+   })
 }
 
 #' @describeIn checkFileSystem Checks that the path exists and that it is a
@@ -370,29 +358,26 @@ checkIsNotFile <- function( path, path.info= NULL ) {
 #' @export
 checkIsDir <- function( path, path.info= NULL ) {
    tryCatch({
-         if ( ! file.exists(path)) {
-            return( "No such path." )
-         }
-
+      if ( ! file.exists(path)) {
+         "No such path."
+      }
+      else {
          if (is.null(path.info)) {
             path.info <- file.info( path, extra_cols = FALSE )
          }
-
-         if( path.info$isdir ) {
-            check <- ''
+         if ( path.info$isdir ) {
+            ''
          }
          else {
-            check <- 'Not a directory.'
+            'Not a directory.'
          }
-      },
-      error= function (e) {
-         check <<- paste0(
-            "Checking for a directory failed with the following error: ",
-            conditionMessage(e)
-         )
       }
-   )
-   return( check )
+   }, error= function (e) {
+      return( paste0(
+         "Checking for a directory failed with the following error: ",
+         conditionMessage(e)
+      ))
+   })
 }
 
 #' @describeIn checkFileSystem Checks that the path exists and if so ensures it is
@@ -446,27 +431,26 @@ checkIsDir <- function( path, path.info= NULL ) {
 #' @export
 checkIsNotDir <- function( path, path.info= NULL ) {
    tryCatch({
-         if ( ! file.exists(path)) {
-            return( "No such path." )
-         }
+      if ( ! file.exists(path)) {
+         "No such path."
+      }
+      else {
          if (is.null(path.info)) {
             path.info <- file.info( path, extra_cols = FALSE )
          }
-
-         if( path.info$isdir ) {
-            check <- 'Is a directory.'
+         if ( path.info$isdir ) {
+            'Is a directory.'
          }
          else {
-            check <- ''
+            ''
          }
-      },
-      error= function (e) {
-         check <<- paste0(
-            "Checking for a directory failed with the following error: ",
-            conditionMessage(e)
-         )
       }
-   )
+   }, error= function (e) {
+      return( paste0(
+         "Checking for a directory failed with the following error: ",
+         conditionMessage(e)
+      ))
+   })
 }
 
 #' @describeIn checkFileSystem Checks a path to see if it is a symlink (and
@@ -531,36 +515,33 @@ checkIsNotDir <- function( path, path.info= NULL ) {
 #'
 checkIsLink <- function( path, okBadLink = FALSE ) {
    tryCatch({
-         linkStat <- Sys.readlink( path )
-         if (is.na(linkStat)) {
-            if ( ! file.exists(path)) {
-               check <- 'No such path.'
-            }
-            else {
-               # This may not be possible...
-               check <- 'Unspecified error occurred checking if existing path was a link.'
-            }
-         }
-         else if (linkStat == "") {
-            check <- 'Not a link.'
+      linkStat <- Sys.readlink( path )
+      if (is.na(linkStat)) {
+         if ( ! file.exists(path)) {
+            'No such path.'
          }
          else {
-            if (okBadLink | file.exists(path) ) {
-               check <- ''
-            }
-            else {
-               check <- 'Bad link.'
-            }
+            # This may not be possible...
+            'Unspecified error occurred checking if existing path was a link.'
          }
-      },
-      error= function(e) {
-         check <<- paste0(
-            "Checking for a link failed with the following error: ",
-            conditionMessage(e)
-         )
       }
-   )
-   return( check )
+      else if (linkStat == "") {
+         'Not a link.'
+      }
+      else {
+         if (okBadLink | file.exists(path) ) {
+            ''
+         }
+         else {
+            'Bad link.'
+         }
+      }
+   }, error= function(e) {
+      return( paste0(
+         "Checking for a link failed with the following error: ",
+         conditionMessage(e)
+      ))
+   })
 }
 
 #' @describeIn checkFileSystem Ensures that the path exists and is a real file or
@@ -620,29 +601,27 @@ checkIsLink <- function( path, okBadLink = FALSE ) {
 #' @export
 checkIsNotLink <- function( path ) {
    tryCatch({
-         linkStat <- Sys.readlink( path )
-         if (is.na(linkStat)) {
-            if ( ! file.exists(path)) {
-               check <- 'No such path.'
-            }
-            else {
-               # This may not be possible...
-               check <- 'Unspecified error occurred checking if existing path was a link.'
-            }
-         }
-         else if (linkStat == "") {
-            check <- ''
+      linkStat <- Sys.readlink( path )
+      if (is.na(linkStat)) {
+         if ( ! file.exists(path)) {
+            'No such path.'
          }
          else {
-            check <- 'Is a link.'
+            # This may not be possible...
+            'Unspecified error occurred checking if existing path was a link.'
          }
-      },
-      error= function(e) {
-         check <<- paste0(
-            "Checking for a link failed with the following error: ",
-            conditionMessage(e)
-         )
       }
-   )
-   return( check )
+      else if (linkStat == "") {
+         ''
+      }
+      else {
+         'Is a link.'
+      }
+   },
+   error= function(e) {
+      return( paste0(
+         "Checking for a link failed with the following error: ",
+         conditionMessage(e)
+      ))
+   })
 }
