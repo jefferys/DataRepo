@@ -1,7 +1,7 @@
 Package: DataRepo
 Type: Package
 Title: Manage a large data file repository
-Version: 0.0.2
+Version: 0.0.3
 Date: 2016-01-20
 Authors@R: c(
       person( "Stuart R", "Jefferys",
