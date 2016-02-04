@@ -1,4 +1,4 @@
-#' Validate source files
+#' Validate files
 #'
 #' Applies several checks to validate a file. Outputs a named character vector
 #' of strings giving the results of the checks, where the names are the tests
@@ -72,7 +72,7 @@
 #' binFile <- tempfile( 'binFile', fileext= '.bin' )
 #' writeBin( as.raw(c(1,2,3)), binFile)
 #'
-#' check <- validateSourceFile( emptyFile, fileSize= 0, checksum= md5EmptyFile )
+#' check <- validateFile( emptyFile, fileSize= 0, checksum= md5EmptyFile )
 #' names(check)
 #' #=> [1] "checkParam_path"                   "checkParam_checksum"
 #' #=> [3] "checkParam_checksumFunc"           "checkParam_fileSize"
@@ -88,25 +88,25 @@
 #' #=> [1] "" "" "" "" "" "" "" "" ""
 #'
 #' # Not checking file contents
-#' check <- validateSourceFile( emptyFile, fileSize= NULL, checksum= NULL )
+#' check <- validateFile( emptyFile, fileSize= NULL, checksum= NULL )
 #' names(check) <- NULL
 #' #=> [1] "" "" "" "" "" "" "" NA NA
 #'
 #' # Bad checksum
-#' check <- validateSourceFile( emptyFile, fileSize= 0, checksum= 'abc123' )
+#' check <- validateFile( emptyFile, fileSize= 0, checksum= 'abc123' )
 #' names(check) <- NULL
 #' #=> [1] "" "" "" "" "" "" "" ""
 #' #=> [9] "Checksum mismatch. Found d41d8cd98f00b204e9800998ecf8427e wanted abc123.
 #'
 #' # Bad file size. No need to check the checksum if file size doesn't match
-#' check <- validateSourceFile( emptyFile, fileSize= 1, checksum= 'BAD' )
+#' check <- validateFile( emptyFile, fileSize= 1, checksum= 'BAD' )
 #' names(check) <- NULL
 #' #=> [1] "" "" "" "" "" "" ""
 #' #=> [8] "File size mismatch. Found 0 wanted 1."
 #' #=> [9] NA
 #'
 #' # Bad file path, no need to check anything else.
-#' check <- validateSourceFile( noSuchFile, fileSize= 0, checksum= md5EmptyFile )
+#' check <- validateFile( noSuchFile, fileSize= 0, checksum= md5EmptyFile )
 #' names(check) <- NULL
 #' #=> [1] ""  ""  ""  ""  ""  "No such path."
 #' #=> [7] NA  NA  NA
@@ -115,7 +115,7 @@
 #' SumIt <- function (path) { sum( as.numeric(
 #'     readBin( path, what = 'raw', n= file.info(path)[['size']] + 1 )
 #' ))}
-#' check <- validateSourceFile( binFile, fileSize= 3, checksum= 6, checksumFunc= SumIt )
+#' check <- validateFile( binFile, fileSize= 3, checksum= 6, checksumFunc= SumIt )
 #' names(check) <- NULL
 #' check
 #' #=> [1] "" "" "" "" "" "" "" "" ""
@@ -123,7 +123,7 @@
 #' # Cleanup
 #' file.remove( emptyFile )
 #' file.remove( binFile )
-validateSourceFile <- function ( path, checksum= NULL, checksumFunc= tools::md5sum,
+validateFile <- function ( path, checksum= NULL, checksumFunc= tools::md5sum,
                                  fileSize= NULL ) {
    .checkParam_path         <- function(path) {
       tryCatch ({
