@@ -11,25 +11,26 @@ validateFile(path, checksum = NULL, checksumFunc = tools::md5sum,
 \item{path}{The path to the file to check. Should exist and be a real file.
 If not, failure will be reported.}
 
-\item{checksum}{The checksum the expected file will have. May be \code{NULL}
-and if so, file size will not be checked. If given the checksum of the file
-specified will be calculated using checksumFUNC, by default using the md5
-algorithm as provided by \code{tools::md5sum}.}
+\item{checksum}{The expected checksum of the file.By default this is
+\code{NULL}, meaning no checksum is generated. If given it will be checked
+agains the value provided by the \code{checksumFunc}.}
 
 \item{checksumFunc}{The function object (not the string name) to use when
-calculating the checksum of a file. Will be called with one parameter,
-\code{path}. The value returned from this function call is tested against
-the \code{checksum} parameters value. That value may not be \code{NULL} or
-a missing value, but may be of any (atomic) vector type. When called, the
-path has already been verified to exists on the file system as a real file
-(not a directory or link). The function object passed may not be
-\code{NULL} if a checksum is provided \code{NULL}, but is not used if the
-checksum is \code{NULL}}
+calculating the checksum of the file. By default this is
+\code{tools::md5sum}. The specified function will be called with one
+parameter, \code{path}. The value returned is then tested against the
+provided \code{checksum}. This returned value should be an (atomic) vector
+type but can not be \code{NULL} or a missing value.  When
+\code{checksumFunc} is called, \code{path} has already been verified and is
+known to exist on the file system as a real file (not a directory or link).
+The function object passed may not be \code{NULL} when \code{checksum} is
+provided, but is not used \code{checksum} is \code{NULL}.}
 
-\item{fileSize}{The expected file of the size, in bytes. May be \code{NULL}
-and if so, file size will not be checked. If a positive value, the size of
-the file will be looked up on the file system and compared. If it does not
-match then failure is reported and the checksum is not checked.}
+\item{fileSize}{The expected size of the file, in bytes. By default this is
+\code{NULL}, meaning file size will not be checked. If a positive value is
+supplied it will be checked against the size of the source file on the file
+system. If it does not match then failure is reported (and \code{checksum}
+is not checked).}
 }
 \value{
 A named character vector of test results. The names are the tests
