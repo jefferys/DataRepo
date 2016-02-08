@@ -62,8 +62,8 @@ expect_testResult_validateFile <- function (got, check, result, useMatch= FALSE)
    }
 }
 
-context( "Setup for testing validateFileSystem()" )
-describe( "File system resources for validateSource function tests", {
+context( "Setup for testing validateFile()" )
+describe( "File system resources for validateFile function tests", {
    it( "includes an existing empty file.", {
       expect_true( file.exists( emptyFile ))
       expect_false( dir.exists( emptyFile ))
@@ -899,5 +899,308 @@ describe( "Result of checksum tests when checksum= correct value", {
       got <- validateFile( path= binFile, fileSize= binFileSize, checksumFunc= SumIt, checksum= SumItBinFile )
       expect_resultFormat_validateFile(got, checked)
       expect_testResult_validateFile(got, "checkChecksumMatches", want)
+   })
+})
+
+context("checkSummary()")
+describe( "Minimal functionality tests with defaults", {
+   it ( 'Returns success string if no error', {
+      obj <- c(testA='', testB='', testC='')
+      want <- ''
+      got <- checkSummary( obj )
+      expect_equal(got, want)
+   })
+   it ( 'Returns failure string if any failure', {
+      obj <- c(testA='', testB='', testC='Bad test c.')
+      want <- 'testC = Bad test c.'
+      got <- checkSummary( obj )
+      expect_equal(got, want)
+   })
+   it ( "Returns failure string for NA's by default", {
+      obj <- c(testA='', testB=NA, testC='')
+      want <- 'testB = NA not ok.'
+      got <- checkSummary( obj )
+      expect_equal(got, want)
+   })
+   it ( 'Returns combination string for multiple failures', {
+      obj <- c(testA="", testB=NA, testC="Bad c.", testD="Bad d.", testE="", testF= NA)
+      want <- 'testB = NA not ok.; testC = Bad c.; testD = Bad d.; testF = NA not ok.'
+      got <- checkSummary( obj )
+      expect_equal(got, want)
+   })
+})
+describe( "table testing of skip= and okNa= parameters", {
+   describe( "where all results are success (empty) strings", {
+      it ( 'works for all combinations of skip and okNo on one element objects', {
+         obj <- c (A= "")
+
+         tests <- list(
+            list( naOk= NULL,   skip= NULL, want= '' ),
+            list( naOk= c('A'), skip= NULL, want= '' ),
+
+            list( naOk= NULL,   skip= c('A'), want= '' ),
+            list( naOk= c('A'), skip= c('A'), want= '' )
+         )
+
+         lapply( tests, function (x) {
+            got <- checkSummary(obj, naOk= x$naOk, skip= x$skip)
+            expect_equal(got, x$want)
+         })
+      })
+      it ( 'works for all combinations of skip and okNo on two element objects', {
+         obj <- c (A= "", B= "")
+
+         tests <- list(
+            list( naOk= NULL,         skip= NULL, want= '' ),
+            list( naOk= c('A'),       skip= NULL, want= '' ),
+            list( naOk= c('B'),       skip= NULL, want= '' ),
+            list( naOk= c('A', 'B' ), skip= NULL, want= '' ),
+
+            list( naOk= NULL,         skip= c('A'), want= '' ),
+            list( naOk= c('A'),       skip= c('A'), want= '' ),
+            list( naOk= c('B'),       skip= c('A'), want= '' ),
+            list( naOk= c('A', 'B' ), skip= c('A'), want= '' ),
+
+            list( naOk= NULL,         skip= c('B'), want= '' ),
+            list( naOk= c('A'),       skip= c('B'), want= '' ),
+            list( naOk= c('B'),       skip= c('B'), want= '' ),
+            list( naOk= c('A', 'B' ), skip= c('B'), want= '' ),
+
+            list( naOk= NULL,         skip= c('A', 'B'), want= '' ),
+            list( naOk= c('A'),       skip= c('A', 'B'), want= '' ),
+            list( naOk= c('B'),       skip= c('A', 'B'), want= '' ),
+            list( naOk= c('A', 'B' ), skip= c('A', 'B'), want=  '')
+
+         )
+
+         lapply( tests, function (x) {
+            got <- checkSummary(obj, naOk= x$naOk, skip= x$skip)
+            expect_equal(got, x$want)
+         })
+      })
+   })
+   describe( "where all results are failure strings", {
+      it ( 'works for all combinations of skip and okNo on one element objects', {
+         obj <- c(A= "Bad a.")
+
+         tests <- list(
+            list( naOk= NULL,   skip= NULL, want= 'A = Bad a.' ),
+            list( naOk= c('A'), skip= NULL, want= 'A = Bad a.' ),
+
+            list( naOk= NULL,   skip= c('A'), want= '' ),
+            list( naOk= c('A'), skip= c('A'), want= '' )
+         )
+
+         lapply( tests, function (x) {
+            got <- checkSummary(obj, naOk= x$naOk, skip= x$skip)
+            expect_equal(got, x$want)
+         })
+      })
+      it ( 'works for all combinations of skip and okNo on two element objects', {
+         obj <- c (A= "Bad a.", B= "Bad b.")
+
+         tests <- list(
+            list( naOk= NULL,         skip= NULL, want= 'A = Bad a.; B = Bad b.' ),
+            list( naOk= c('A'),       skip= NULL, want= 'A = Bad a.; B = Bad b.' ),
+            list( naOk= c('B'),       skip= NULL, want= 'A = Bad a.; B = Bad b.' ),
+            list( naOk= c('A', 'B' ), skip= NULL, want= 'A = Bad a.; B = Bad b.' ),
+
+            list( naOk= NULL,         skip= c('A'), want= 'B = Bad b.' ),
+            list( naOk= c('A'),       skip= c('A'), want= 'B = Bad b.' ),
+            list( naOk= c('B'),       skip= c('A'), want= 'B = Bad b.' ),
+            list( naOk= c('A', 'B' ), skip= c('A'), want= 'B = Bad b.' ),
+
+            list( naOk= NULL,         skip= c('B'), want= 'A = Bad a.' ),
+            list( naOk= c('A'),       skip= c('B'), want= 'A = Bad a.' ),
+            list( naOk= c('B'),       skip= c('B'), want= 'A = Bad a.' ),
+            list( naOk= c('A', 'B' ), skip= c('B'), want= 'A = Bad a.' ),
+
+            list( naOk= NULL,         skip= c('A', 'B'), want= '' ),
+            list( naOk= c('A'),       skip= c('A', 'B'), want= '' ),
+            list( naOk= c('B'),       skip= c('A', 'B'), want= '' ),
+            list( naOk= c('A', 'B' ), skip= c('A', 'B'), want=  '')
+
+         )
+
+         lapply( tests, function (x) {
+            got <- checkSummary(obj, naOk= x$naOk, skip= x$skip)
+            expect_equal(got, x$want)
+         })
+      })
+   })
+   describe( "where all results are missing (NA) results", {
+      it ( 'works for all combinations of skip and okNo on one element objects', {
+         obj <- c (A= NA_character_)
+
+         tests <- list(
+            list( naOk= NULL,   skip= NULL, want= 'A = NA not ok.' ),
+            list( naOk= c('A'), skip= NULL, want= '' ),
+
+            list( naOk= NULL,   skip= c('A'), want= '' ),
+            list( naOk= c('A'), skip= c('A'), want= '' )
+         )
+
+         lapply( tests, function (x) {
+            got <- checkSummary(obj, naOk= x$naOk, skip= x$skip)
+            expect_equal(got, x$want)
+         })
+      })
+      it ( 'works for all combinations of skip and okNo on two element objects', {
+         obj <- c (A= NA_character_, B= NA_character_)
+
+         tests <- list(
+            list( naOk= NULL,         skip= NULL, want= 'A = NA not ok.; B = NA not ok.' ),
+            list( naOk= c('A'),       skip= NULL, want= 'B = NA not ok.' ),
+            list( naOk= c('B'),       skip= NULL, want= 'A = NA not ok.' ),
+            list( naOk= c('A', 'B' ), skip= NULL, want= '' ),
+
+            list( naOk= NULL,         skip= c('A'), want= 'B = NA not ok.' ),
+            list( naOk= c('A'),       skip= c('A'), want= 'B = NA not ok.' ),
+            list( naOk= c('B'),       skip= c('A'), want= '' ),
+            list( naOk= c('A', 'B' ), skip= c('A'), want= '' ),
+
+            list( naOk= NULL,         skip= c('B'), want= 'A = NA not ok.' ),
+            list( naOk= c('A'),       skip= c('B'), want= '' ),
+            list( naOk= c('B'),       skip= c('B'), want= 'A = NA not ok.' ),
+            list( naOk= c('A', 'B' ), skip= c('B'), want= '' ),
+
+            list( naOk= NULL,         skip= c('A', 'B'), want= '' ),
+            list( naOk= c('A'),       skip= c('A', 'B'), want= '' ),
+            list( naOk= c('B'),       skip= c('A', 'B'), want= '' ),
+            list( naOk= c('A', 'B' ), skip= c('A', 'B'), want=  '')
+
+         )
+
+         lapply( tests, function (x) {
+            got <- checkSummary(obj, naOk= x$naOk, skip= x$skip)
+            expect_equal(got, x$want)
+         })
+      })
+   })
+   describe("where have one each of success, failure, and NA", {
+      it ( 'works for all combinations of skip and okNo.', {
+         obj <- c (A= "", B= "Bad b.", C= NA)
+
+         tests <- list(
+            list( naOk= NULL,             skip= NULL, want= 'B = Bad b.; C = NA not ok.' ),
+            list( naOk= c('A'),           skip= NULL, want= 'B = Bad b.; C = NA not ok.' ),
+            list( naOk= c('B'),           skip= NULL, want= 'B = Bad b.; C = NA not ok.' ),
+            list( naOk= c('C'),           skip= NULL, want= 'B = Bad b.' ),
+            list( naOk= c('A', 'B'     ), skip= NULL, want= 'B = Bad b.; C = NA not ok.' ),
+            list( naOk= c('A',      'C'), skip= NULL, want= 'B = Bad b.' ),
+            list( naOk= c(     'B', 'C'), skip= NULL, want= 'B = Bad b.' ),
+            list( naOk= c('A', 'B', 'C'), skip= NULL, want= 'B = Bad b.' ),
+
+            list( naOk= NULL,             skip= c('A'), want= 'B = Bad b.; C = NA not ok.' ),
+            list( naOk= c('A'),           skip= c('A'), want= 'B = Bad b.; C = NA not ok.' ),
+            list( naOk= c('B'),           skip= c('A'), want= 'B = Bad b.; C = NA not ok.' ),
+            list( naOk= c('C'),           skip= c('A'), want= 'B = Bad b.' ),
+            list( naOk= c('A', 'B'     ), skip= c('A'), want= 'B = Bad b.; C = NA not ok.' ),
+            list( naOk= c('A',      'C'), skip= c('A'), want= 'B = Bad b.' ),
+            list( naOk= c(     'B', 'C'), skip= c('A'), want= 'B = Bad b.' ),
+            list( naOk= c('A', 'B', 'C'), skip= c('A'), want= 'B = Bad b.' ),
+
+            list( naOk= NULL,             skip= c('B'), want= 'C = NA not ok.' ),
+            list( naOk= c('A'),           skip= c('B'), want= 'C = NA not ok.' ),
+            list( naOk= c('B'),           skip= c('B'), want= 'C = NA not ok.' ),
+            list( naOk= c('C'),           skip= c('B'), want= '' ),
+            list( naOk= c('A', 'B'     ), skip= c('B'), want= 'C = NA not ok.' ),
+            list( naOk= c('A',      'C'), skip= c('B'), want= '' ),
+            list( naOk= c(     'B', 'C'), skip= c('B'), want= '' ),
+            list( naOk= c('A', 'B', 'C'), skip= c('B'), want= '' ),
+
+            list( naOk= NULL,             skip= c('C'), want= 'B = Bad b.' ),
+            list( naOk= c('A'),           skip= c('C'), want= 'B = Bad b.' ),
+            list( naOk= c('B'),           skip= c('C'), want= 'B = Bad b.' ),
+            list( naOk= c('C'),           skip= c('C'), want= 'B = Bad b.' ),
+            list( naOk= c('A', 'B'     ), skip= c('C'), want= 'B = Bad b.' ),
+            list( naOk= c('A',      'C'), skip= c('C'), want= 'B = Bad b.' ),
+            list( naOk= c(     'B', 'C'), skip= c('C'), want= 'B = Bad b.' ),
+            list( naOk= c('A', 'B', 'C'), skip= c('C'), want= 'B = Bad b.' ),
+
+            list( naOk= NULL,             skip= c('A', 'B'), want= 'C = NA not ok.' ),
+            list( naOk= c('A'),           skip= c('A', 'B'), want= 'C = NA not ok.' ),
+            list( naOk= c('B'),           skip= c('A', 'B'), want= 'C = NA not ok.' ),
+            list( naOk= c('C'),           skip= c('A', 'B'), want= '' ),
+            list( naOk= c('A', 'B'     ), skip= c('A', 'B'), want= 'C = NA not ok.' ),
+            list( naOk= c('A',      'C'), skip= c('A', 'B'), want= '' ),
+            list( naOk= c(     'B', 'C'), skip= c('A', 'B'), want= '' ),
+            list( naOk= c('A', 'B', 'C'), skip= c('A', 'B'), want= '' ),
+
+            list( naOk= NULL,             skip= c('A', 'C'), want= 'B = Bad b.' ),
+            list( naOk= c('A'),           skip= c('A', 'C'), want= 'B = Bad b.' ),
+            list( naOk= c('B'),           skip= c('A', 'C'), want= 'B = Bad b.' ),
+            list( naOk= c('C'),           skip= c('A', 'C'), want= 'B = Bad b.' ),
+            list( naOk= c('A', 'B'     ), skip= c('A', 'C'), want= 'B = Bad b.' ),
+            list( naOk= c('A',      'C'), skip= c('A', 'C'), want= 'B = Bad b.' ),
+            list( naOk= c(     'B', 'C'), skip= c('A', 'C'), want= 'B = Bad b.' ),
+            list( naOk= c('A', 'B', 'C'), skip= c('A', 'C'), want= 'B = Bad b.' ),
+
+            list( naOk= NULL,             skip= c('B', 'C'), want= '' ),
+            list( naOk= c('A'),           skip= c('B', 'C'), want= '' ),
+            list( naOk= c('B'),           skip= c('B', 'C'), want= '' ),
+            list( naOk= c('C'),           skip= c('B', 'C'), want= '' ),
+            list( naOk= c('A', 'B'     ), skip= c('B', 'C'), want= '' ),
+            list( naOk= c('A',      'C'), skip= c('B', 'C'), want= '' ),
+            list( naOk= c(     'B', 'C'), skip= c('B', 'C'), want= '' ),
+            list( naOk= c('A', 'B', 'C'), skip= c('B', 'C'), want= '' ),
+
+            list( naOk= NULL,             skip= c('A', 'B', 'C'), want= '' ),
+            list( naOk= c('A'),           skip= c('A', 'B', 'C'), want= '' ),
+            list( naOk= c('B'),           skip= c('A', 'B', 'C'), want= '' ),
+            list( naOk= c('C'),           skip= c('A', 'B', 'C'), want= '' ),
+            list( naOk= c('A', 'B'     ), skip= c('A', 'B', 'C'), want= '' ),
+            list( naOk= c('A',      'C'), skip= c('A', 'B', 'C'), want= '' ),
+            list( naOk= c(     'B', 'C'), skip= c('A', 'B', 'C'), want= '' ),
+            list( naOk= c('A', 'B', 'C'), skip= c('A', 'B', 'C'), want= '' )
+         )
+
+         lapply( tests, function (x) {
+            got <- checkSummary(obj, naOk= x$naOk, skip= x$skip)
+            expect_equal(got, x$want)
+         })
+      })
+   })
+})
+describe( "table testing of bad parameters", {
+   it( "Generates error messages with bad result=", {
+      tests <- list(
+         list( id= 'null',   result= NULL,         naOk= NULL, skip=NULL, want= "checkParam_result = Not a vector of mode character." ),
+         list( id= 'list',   result= list(),       naOk= NULL, skip=NULL, want= "checkParam_result = Not a vector of mode character." ),
+         list( id= '1,2',    result= c(1,2),       naOk= NULL, skip=NULL, want= "checkParam_result = Not a vector of mode character." ),
+         list( id= 'na',     result= NA,           naOk= NULL, skip=NULL, want= "checkParam_result = Not a vector of mode character." ),
+         list( id= 'empty',  result= character(0), naOk= NULL, skip=NULL, want= "checkParam_result = Length is not between 1 and Inf." ),
+         list( id= 'noName', result= "bob",        naOk= NULL, skip=NULL, want= "checkParam_result = No names attribute." )
+      )
+      lapply( tests, function (x) {
+         got <- checkSummary(x$result, naOk= x$naOk, skip= x$skip)
+         expect_equal(got, x$want, info= x$id)
+      })
+   })
+   it( "Generates error messages with bad naOk=", {
+      tests <- list(
+         list( id= 'list',    result= c(A=''), naOk= list(),       skip=NULL, want= "checkParam_naOk = Not a vector of mode character." ),
+         list( id= '1,2',     result= c(A=''), naOk= c(1,2),       skip=NULL, want= "checkParam_naOk = Not a vector of mode character." ),
+         list( id= 'na',      result= c(A=''), naOk= NA,           skip=NULL, want= "checkParam_naOk = Not a vector of mode character." ),
+         list( id= 'empty',   result= c(A=''), naOk= character(0), skip=NULL, want= "checkParam_naOk = Length is not between 1 and Inf." ),
+         list( id= 'unknown', result= c(A=''), naOk= "unknown",    skip=NULL, want= "checkParam_result_naOk = Some element is not in the checklist." )
+      )
+      lapply( tests, function (x) {
+         got <- checkSummary(x$result, naOk= x$naOk, skip= x$skip)
+         expect_equal(got, x$want, info= x$id)
+      })
+   })
+   it( "Generates error messages with bad skip=", {
+      tests <- list(
+         list( id= 'list',    result= c(A=''), naOk= NULL, skip= list(),       want= "checkParam_skip = Not a vector of mode character." ),
+         list( id= '1,2',     result= c(A=''), naOk= NULL, skip= c(1,2),       want= "checkParam_skip = Not a vector of mode character." ),
+         list( id= 'na',      result= c(A=''), naOk= NULL, skip=  NA,          want= "checkParam_skip = Not a vector of mode character." ),
+         list( id= 'empty',   result= c(A=''), naOk= NULL, skip= character(0), want= "checkParam_skip = Length is not between 1 and Inf." ),
+         list( id= 'unknown', result= c(A=''), naOk= NULL, skip= "unknown",    want= "checkParam_result_skip = Some element is not in the checklist." )
+      )
+      lapply( tests, function (x) {
+         got <- checkSummary(x$result, naOk= x$naOk, skip= x$skip)
+         expect_equal(got, x$want, info= x$id)
+      })
    })
 })

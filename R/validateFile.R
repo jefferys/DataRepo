@@ -324,3 +324,142 @@ validateFile <- function ( path, checksum= NULL, checksumFunc= tools::md5sum,
    # nocov end
 
 }
+
+#' Summarize a vector of check results
+#'
+#' One check test results in an empty string, an NA, or error message. Multiple
+#' test checks can be merged into a vector with each element named for a test
+#' and giving its outcome. This can then be summarized into a single check
+#' result by merging error strings if any, reporting an empty string if
+#' everything passed, and handling NA's as either errors or ignoring them.
+#'
+#' @param result A vector of check results, with element values being an empty
+#'   string (success), a failure string, or \code{NA_character_}. Elements are
+#'   named for the test they represent.
+#'
+#' @param naOk A vector of the names of elements for which \code{NA} is ok. If
+#'   \code{NA} is ok for every element, then set this to \code{names(result)}.
+#'   By default, this is \code{NULL} and missing values are converted to
+#'   failures for every test.
+#'
+#' @param skip A vector of the names of elements to be left out of the
+#'   summary, regardless of their value. By default all elements are considered
+#'   and used.
+#'
+#' @return As other check functions, this returns a single character string
+#'   which is empty if the check succeeds and contains a failure message if the
+#'   the check fails. However, here success means all tests not skipped succeed.
+#'   Missing values are by default considered failures. A failure message is
+#'   reported if any element failed.
+#'
+#'   The failure message is formated like "<testName> = <error message>; ..."
+#'   where each element with a failing message, from first to last, are reported
+#'   and joined by '; '. If an element has a missing value, it will first be
+#'   converted to the failure string \code{"NA not ok."} before summarizing,
+#'   unless its test name is provided in a string vector as \code{naOk} (or as
+#'   \code{skip}, except then its value will be ignored even if it failed.)
+#'
+#' @examples
+#' fauxChecks <- c('', '', '')
+#' names(fauxChecks) <- c('checkA', 'checkB', 'checkC')
+#' checkSummary(fauxChecks)
+#' #=> [1] ""
+#' fauxChecks['checkC'] <- NA_character_
+#' checkSummary(fauxChecks)
+#' #=> [1] "checkC = NA not ok."
+#' checkSummary(fauxChecks, naOk= c('checkC'))
+#' #=> [1] ""
+#' fauxChecks['checkB'] <- 'I am broken.'
+#' checkSummary(fauxChecks)
+#' #=> [1] "checkB = I am broken.; checkC = NA not ok."
+#' checkSummary(fauxChecks, naOk= c('checkB', 'checkC'))
+#' #=> [1] "checkB = I am broken."
+#' checkSummary(fauxChecks, skip= c('checkB', 'checkC'))
+#' #=> [1] ""
+#' @export
+checkSummary <- function ( result, naOk= NULL, skip= NULL ) {
+
+   # Parameter check functions
+   .checkParam_result <- function( result ) {
+      check <- checkIsVector(result, mode= 'character')
+      if (check != '' ) return(check)
+      check <- checkLength(result, minimumLength = 1)
+      if (check != '' ) return(check)
+      testNames <- names(result)
+      if (is.null(testNames)) {
+         return('No names attribute.')
+      }
+      return( '' )
+   }
+   .checkParam_naOk <- function( naOk ) {
+      if (is.null(naOk)) {
+         return('')
+      } else {
+         check <- checkIsVector(naOk, mode= 'character')
+         if (check != '' ) return(check)
+         check <- checkLength(naOk, minimumLength = 1)
+         return(check)
+      }
+   }
+   .checkParam_skip <- function( skip ) {
+      if (is.null(skip)) {
+         return('')
+      } else {
+         check <- checkIsVector(skip, mode= 'character')
+         if (check != '' ) return(check)
+         check <- checkLength(skip, minimumLength = 1)
+         return(check)
+      }
+   }
+   .checkParam_result_naOk <- function( result, naOk ) {
+      if (is.null(naOk)) {
+         return('')
+      } else {
+         return(checkIsIn(naOk, names(result)))
+      }
+   }
+   .checkParam_result_skip <- function( result, skip ) {
+      if (is.null(skip)) {
+         return('')
+      } else {
+         return(checkIsIn(skip, names(result)))
+      }
+   }
+
+   ok <- .checkParam_result( result )
+   if (ok != '') {
+      return( paste0( "checkParam_result = ", ok ))
+   }
+   ok <- .checkParam_naOk( naOk )
+   if (ok != '') {
+      return( paste0( "checkParam_naOk = ", ok ))
+   }
+   ok  <- .checkParam_skip( skip )
+   if (ok != '') {
+      return( paste0( "checkParam_skip = ", ok ))
+   }
+   ok <- .checkParam_result_naOk( result, naOk )
+   if (ok != '') {
+      return( paste0( "checkParam_result_naOk = ", ok ))
+   }
+   ok <- .checkParam_result_skip( result, skip )
+   if (ok != '') {
+      return( paste0( "checkParam_result_skip = ", ok ))
+   }
+
+   if (! is.null(naOk)) {
+      result[intersect( naOk, names( result[is.na( result )] ))] <- ''
+   }
+   result[is.na(result)] <- 'NA not ok.'
+
+   if (! is.null(skip)) {
+      result[skip] <- ""
+   }
+
+   check <- ''
+   if ( any( result != '' )) {
+      badTests <- result[which( result != '' )]
+      check <- paste( names( badTests ), badTests, sep= ' = ', collapse= '; ')
+   }
+   return(check)
+}
