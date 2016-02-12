@@ -13,7 +13,9 @@
 #' will result in an error containing validation vector.
 #'
 #' @param file The file to copy into the repo. May be relative or absolute, but
-#'   may not be a symlink or a directory.
+#'   may not be a symlink or a directory. File copies will be created with permissions
+#'   "664" (read by all, write by group and owner, execute by none) and with
+#'   group \code{writeGroup} if that was specified.
 #'
 #' @param repo The base directory for the repo. Must exist on the file system
 #'   and should have a restrictive set of ownerships and permissions that
@@ -155,7 +157,7 @@ addFile <- function( file, repo= getwd(), entry= NULL, asFile= basename(file),
             return( paste0( "Setting copy write group failed." ))
          }
       }
-      if (! Sys.chmod(target, mode = "2775", use_umask = FALSE)) {
+      if (! Sys.chmod(target, mode = "664", use_umask = FALSE)) {
          return(paste0( "Setting copy permissions failed." ))
       }
       return("")

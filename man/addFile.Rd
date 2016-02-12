@@ -10,7 +10,9 @@ addFile(file, repo = getwd(), entry = NULL, asFile = basename(file),
 }
 \arguments{
 \item{file}{The file to copy into the repo. May be relative or absolute, but
-may not be a symlink or a directory.}
+may not be a symlink or a directory. File copies will be created with permissions
+"664" (read by all, write by group and owner, execute by none) and with
+group \code{writeGroup} if that was specified.}
 
 \item{repo}{The base directory for the repo. Must exist on the file system
 and should have a restrictive set of ownerships and permissions that

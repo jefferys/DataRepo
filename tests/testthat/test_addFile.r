@@ -420,7 +420,7 @@ describe( "Succesfully adding a new file to the repo (all checks)", {
             setwd( oldHomeDir )
          }
       })
-      it( "Adds full-path file to full-path repo with new name", {
+      it( "Adds full-path file to full-path repo with entry and new name", {
          entryPath <- file.path( 'an', 'entry', 'path' )
          dirToRemove <- file.path( repoDir, "an")
          if (file.exists(dirToRemove)) {
@@ -440,9 +440,13 @@ describe( "Succesfully adding a new file to the repo (all checks)", {
             expect_true( file.exists( targetFile ))
             expect_equal( file.info( targetFile, extra_cols = TRUE )$grname,
                           otherGroup )
+            expect_equal( as.character(file.info( targetFile, extra_cols = TRUE )$mode),
+                          "664" )
             expect_true( dir.exists( dirToRemove ))
             expect_equal( file.info( dirToRemove, extra_cols = TRUE )$grname,
                           otherGroup )
+            expect_equal( as.character(file.info( dirToRemove, extra_cols = TRUE )$mode),
+                          "2775" )
             unlink(dirToRemove, recursive= TRUE)
             expect_false( file.exists( targetFile ))
             expect_false( dir.exists( dirToRemove ))
