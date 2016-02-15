@@ -19,6 +19,9 @@ Description: This package helps manage a large (100+ TB) collection of data
     versions yet.
 License: MIT + file LICENSE
 LazyData: TRUE
+Imports:
+    tools,
+    utils
 Suggests:
     testthat
 URL: http://github.com/jefferys/DataRepo
