@@ -38,7 +38,7 @@ allParamDF <- data.frame(
    writeGroup= rep(otherGroup, 3),
    fileSize= c(sourceFileSize, truncFileSize, mutFileSize),
    checksum= c(sourceFileMd5, truncFileMd5, mutFileMd5),
-#   checksumFunc= c(tools::md5sum, tools::md5sum, tools::md5sum),
+   checksumFunc= c('tools::md5sum', 'tools::md5sum', 'tools::md5sum'),
    stringsAsFactors= FALSE
 )
 
@@ -56,8 +56,8 @@ describe( "Set up.", {
    describe( "The data frames of test data are reasonable.", {
       it ( "Has the expected all-parameter data frame", {
          expect_equal( nrow( allParamDF ), 3 )
-         expect_equal( ncol( allParamDF ), 7 )
-   #      expect_equal( names( allParamDF ), names(formals(addFile)))
+         expect_equal( ncol( allParamDF ), 8 )
+         expect_equal( names( allParamDF ), names(formals(addFile)))
       })
    })
    describe( "The group test data are reasonable.", {
