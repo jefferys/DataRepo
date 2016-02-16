@@ -1,16 +1,17 @@
 #' Add a file to a data repo.
 #'
-#' Copies the specified \code{file} into the \code{repo}, or to the current
-#' directory if no repository is specified. It will be renamed if \code{asFile}
-#' is specified, and will be put into a subdirectory of the repo if \code{entry}
-#' is specified, possibly a multi-directory path. This will be created if
-#' needed. Assuming all optional elements are specified, the path of the file
-#' created in the repository will be \code{<repo>\\< entry>\\<asFile>}. To
-#' validate the file before copy, expected file size and file checksums can be
-#' given. If \code{file} does not match, an error-containing validation vector
-#' will be returned. Regardless of initial validation, the copy will be
-#' validated using the actual file size and file checksum after copy. Any error
-#' will result in an error containing validation vector.
+#' Copies the specified \code{file=} into the \code{repo=}, or to the current
+#' directory if no repository is specified. It will be renamed if \code{asFile=}
+#' is specified, and will be put into a subdirectory of the repo if
+#' \code{entry=} is specified, possibly as a multi-directory path. This will be
+#' created if needed. Assuming all optional elements are specified, the path of
+#' the file created in the repository will be \code{<repo>\\< entry>\\<asFile>}.
+#' To validate the file before copy, expected \code{fileSize=} and
+#' \code{checksum=} can be given. If inspection of \code{file=} does not match,
+#' an error-containing validation vector will be returned. Regardless of initial
+#' validation, the copy will be validated using the actual file size and file
+#' checksum after copy. Successful copy is reported as a vector of empty
+#' strings. Problems are reported with one or more non-empty elements.
 #'
 #' @param file The file to copy into the repo. May be relative or absolute, but
 #'   may not be a symlink or a directory. File copies will be created with permissions
@@ -47,17 +48,16 @@
 #'   \code{NULL}, meaning no checksum is generated. If given it will be checked
 #'   agains the value provided by the \code{checksumFunc}.
 #'
-#' @param checksumFunc The function object (not the string name) to use when
-#'   calculating checksums. By default this is \code{tools::md5sum}. The
-#'   specified function will be called with one parameter, \code{path}. This
-#'   returned value should be an (atomic) vector type but can not be \code{NULL}
-#'   or a missing value.  When \code{checksumFunc} is called, \code{path} has
-#'   already been verified and is known to exist on the file system as a real
-#'   file (not a directory or link). The function object passed may not be
-#'   \code{NULL} when \code{checksum} is provided, but is not used
-#'   \code{checksum} is \code{NULL}. Note, this same function is used to
-#'   calculate checksums for validating the copy, so it called even when no
-#'   source checksum was provided.
+#' @param checksumFunc The function or function name (as a string) that will be
+#'   used when calculated checksums. The calculated checksum will be used to
+#'   verifying files against any provided checksums and after copying. String
+#'   names may be qualified with a package name as the function named is
+#'   retrieved using \code{\link{getSomewhere}} By default this is
+#'   '\code{'tools::md5sum'}. The specified function is called with one
+#'   parameter, the \code{path}. The returned checksum value should be an
+#'   (atomic) vector type but can not be \code{NULL} or a missing value.  When
+#'   \code{checksumFunc} is called, \code{path} has already been verified and is
+#'   known to exist on the file system as a real file (not a directory or link).
 #'
 #' @return A named vector of validation results. Each element is named for a
 #'   check performed, and will be the empty string if the check succeeded, a
@@ -77,7 +77,7 @@
 #' @export
 addFile <- function( file, repo= getwd(), entry= NULL, asFile= basename(file),
                      writeGroup= NULL, fileSize= NULL, checksum= NULL,
-                     checksumFunc= tools::md5sum ) {
+                     checksumFunc= 'tools::md5sum' ) {
    .checkParam_repo  <- function() {
       force(repo)
       check <- checkIsSingle( repo, mode='character' )
@@ -136,8 +136,11 @@ addFile <- function( file, repo= getwd(), entry= NULL, asFile= basename(file),
    .checkParam_checksumFunc <- function() {
       force(checksumFunc)
       check <- checkIsNotNull( checksumFunc )
-      if (check == '' && ! is.function( checksumFunc )) {
-         check <- 'Not a function object.'
+      if ( check == "" && ! is.function( checksumFunc )) {
+         check <- checkIsSingle(checksumFunc, 'character')
+         if ( check == "" ) {
+            check <- checkCharacterCount( checksumFunc, minimumCharacterCount= 1 )
+         }
       }
       return(check)
    }
@@ -154,11 +157,11 @@ addFile <- function( file, repo= getwd(), entry= NULL, asFile= basename(file),
       if (! is.null(writeGroup)) {
          ok <- chgrp(writeGroup, target)
          if (is.null(ok) || ! is.character(ok) || is.na(ok) || length(ok) != 1 || nchar(ok) < 1) {
-            return( paste0( "Setting copy write group failed." ))
+            return( "Setting copy write group failed." )
          }
       }
       if (! Sys.chmod(target, mode = "664", use_umask = FALSE)) {
-         return(paste0( "Setting copy permissions failed." ))
+         return( "Setting copy permissions failed." )
       }
       return("")
    }
@@ -225,6 +228,10 @@ addFile <- function( file, repo= getwd(), entry= NULL, asFile= basename(file),
 
          result['checkParam_checksumFunc'] <- .checkParam_checksumFunc()
          if (result['checkParam_checksumFunc'] != '') { return(result) }
+
+         if (is.character(checksumFunc)) {
+            checksumFunc <- getSomewhere(checksumFunc)
+         }
 
          result['checkValidSource'] <- .checkValidSource(naOk = naOk)
          if (result['checkValidSource'] != '') { return(result) }

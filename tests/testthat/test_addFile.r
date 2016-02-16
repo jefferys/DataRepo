@@ -624,12 +624,12 @@ describe( "Reports problems", {
          got <- addFile( file= sourceFile, repoDir, checksumFunc= NULL )
          expect_equal(got['checkParam_checksumFunc'], want)
 
-         want <- c(checkParam_checksumFunc= "Not a function object.")
-
+         want <- c(checkParam_checksumFunc= "Character count is not between 1 and Inf.")
          got <- addFile( file= sourceFile, repo= repoDir,
-                         checksumFunc= "tools::md5sum" )
+                         checksumFunc= "" )
          expect_equal(got['checkParam_checksumFunc'], want)
 
+         want <- c(checkParam_checksumFunc= "Not a vector of mode character.")
          got <- addFile( file= sourceFile, repo= repoDir, checksumFunc= NA )
          expect_equal(got['checkParam_checksumFunc'], want)
       })
@@ -990,9 +990,9 @@ describe( "Reports problems", {
             expect_false( dir.exists( dirToRemove ))
             expect_false( file.exists( targetFile ))
 
-            want['makeTargetDir'] <- 'Unexpected error: bad strsplit.'
+            want['makeTargetDir'] <- 'Unexpected error: bad dir.create.'
             with_mock(
-               `base::strsplit`= function(...) { stop('bad strsplit.') },
+               `base::dir.create`= function(...) { stop('bad dir.create.') },
                got <- addFile( sourceFile, repo= repoDir, entry= entryPath,
                                asFile= newBaseName, fileSize= sourceFileSize,
                                checksum= sourceFileMd5 )
