@@ -633,7 +633,7 @@ describe( "Reports problems", {
          got <- addFile( file= sourceFile, repo= repoDir, checksumFunc= NA )
          expect_equal(got['checkParam_checksumFunc'], want)
       })
-      it( "catches bad fileAs= parameters", {
+      it( "catches bad asFile= parameters", {
           want <- c(checkParam_asFile= "Not a vector of mode character.")
 
           got <- addFile( file= sourceFile, asFile= NULL )

@@ -49,15 +49,16 @@
 #'   agains the value provided by the \code{checksumFunc}.
 #'
 #' @param checksumFunc The function or function name (as a string) that will be
-#'   used when calculated checksums. The calculated checksum will be used to
-#'   verifying files against any provided checksums and after copying. String
-#'   names may be qualified with a package name as the function named is
-#'   retrieved using \code{\link{getSomewhere}} By default this is
-#'   '\code{'tools::md5sum'}. The specified function is called with one
-#'   parameter, the \code{path}. The returned checksum value should be an
-#'   (atomic) vector type but can not be \code{NULL} or a missing value.  When
-#'   \code{checksumFunc} is called, \code{path} has already been verified and is
-#'   known to exist on the file system as a real file (not a directory or link).
+#'   used when calculating checksums. The calculated source file checksum will
+#'   be verified against any provided checksums before copying and against a
+#'   recalculated checksum after copying. String function names may be qualified
+#'   with a \code{SomePackage::} prefix as the function named is retrieved using
+#'   \code{\link{getSomewhere}}. By default the function used is
+#'   '\code{'tools::md5sum'}. The specified function should have one parameter,
+#'   a file path. The returned checksum value should be an (atomic) vector type
+#'   but can not be \code{NULL} or a missing value. When \code{checksumFunc} is
+#'   called, \code{path} has already been verified and is known to exist on the
+#'   file system as a real file (not a directory or link).
 #'
 #' @return A named vector of validation results. Each element is named for a
 #'   check performed, and will be the empty string if the check succeeded, a

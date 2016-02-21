@@ -29,5 +29,7 @@ vector of check results from each \code{addFile} call is compressed with
 attempted \code{addFile} operations into a character vector with one element
 for each \code{file} in the provided data frame (named with the \code{file}
 name) and a value string indicating success (empty) or describing failure.
+If a failure occurs with any file, a warning is given specifying the
+number of files with problems.
 }
 
